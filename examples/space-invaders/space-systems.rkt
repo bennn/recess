@@ -32,6 +32,12 @@
   #:map pos (get en 'Position)
   #:out [image/e (draw-entities pos 'ellipse-2)])
 
+;; an approach to programming the enemies motion
+;; two alternating systems - horizontal and vertical
+
+
+
+
 (define-system enemy-impact
   #:query en (lookup Enemy Alive)
   #:map _
