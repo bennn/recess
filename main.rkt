@@ -188,24 +188,22 @@
                       [current-events (poll-events (current-events))])
          (begin
            (define systems (list system-name ...))
-           (define system-in-out-name-lists
-             (map
-              (λ (sys)
-                (cons
+           (define (deconstruct-system sys)
+             (cons
                  (list (system-in sys) (system-out sys) sys)
                  (list
                   (map event-generic-name (system-in sys))
                   (map event-generic-name (system-out sys))
                   (system-id sys))))
-                systems))
+           (define system-in-out-name-lists (map deconstruct-system systems))
            (define (init-func) init-expr ...)
            (define first-world-graph-pair
              (recess-init
               init-func
               system-in-out-name-lists
-              (world-dependency-graph (current-world))))
+              (world-dependency-graph (current-world)) deconstruct-system system?))
            (display (graphviz (cdr first-world-graph-pair)))
-           (define first-tsorted-world (tsort (car  first-world-graph-pair)))
+           (define first-tsorted-world (tsort (car first-world-graph-pair)))
            (current-world (struct-copy world (current-world) [dependency-graph first-tsorted-world]))
            (run-expr (list
                       start-time
