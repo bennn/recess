@@ -34,7 +34,7 @@
      (scc scc-graph)))
   ;(displayln (display (map graphviz new)))
   (display new)
-  (cons recess-graph display-graph))
+  (cons recess-graph (cons display-graph new)))
 
 ;; add a system to the dependency graph in the current world
 (define (add-to-graph recess-graph)

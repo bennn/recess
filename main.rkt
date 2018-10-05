@@ -9,6 +9,7 @@
   recess/init
   racket/syntax
   racket/match
+  racket/future
   racket/generic
   racket/hash
   racket/contract
@@ -202,9 +203,9 @@
               init-func
               system-in-out-name-lists
               (world-dependency-graph (current-world)) deconstruct-system system?))
-           (display (graphviz (cdr first-world-graph-pair)))
-           (define first-tsorted-world (tsort (car first-world-graph-pair)))
-           (current-world (struct-copy world (current-world) [dependency-graph first-tsorted-world]))
+           (display (graphviz (cadr first-world-graph-pair)))
+           (define first-tsorted-worlds (map tsort (cddr first-world-graph-pair)))
+           (current-world (struct-copy world (current-world) [dependency-graph first-tsorted-worlds]))
            (run-expr (list
                       start-time
                       (λ () (and stop-expr ...))
@@ -229,7 +230,14 @@
          ;(display "unknown")
          ;(displayln arg)
          (raise "recess: unknown graph node type")]))
-    (define new-world-graph (map step-func (world-dependency-graph (current-world))))
+    (define new-world-graph-futures
+      (map
+       (λ (tsorted-world) (future (λ () (map step-func tsorted-world))))
+       (world-dependency-graph (current-world))))
+    (define new-world-graph
+      (map
+       (λ (tsorted-world-future) (touch tsorted-world-future))
+       new-world-graph-futures))
     (current-world (struct-copy world (current-world) [dependency-graph new-world-graph]))))
 
 ;; the idea here is to poll the events by examing the hash values
